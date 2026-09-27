@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FitnessClub.Domain/FitnessClub.Domain.csproj" />
+  <Project Path="FitnessClub.Domaint.Tests/FitnessClub.Domaint.Tests.csproj" />
+</Solution>
