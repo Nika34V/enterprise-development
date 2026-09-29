@@ -8,30 +8,30 @@ public enum Hall
     /// <summary>
     /// Силовой зал
     /// </summary>
-    Strength,
+    Strength = 0,
 
     /// <summary>
     /// Зал йоги
     /// </summary>
-    Yoga,
+    Yoga = 1,
 
     /// <summary>
     /// Боксёрский зал
     /// </summary>
-    Boxing,
+    Boxing = 2,
 
     /// <summary>
     /// Бассейн
     /// </summary>
-    Swimming,
+    Swimming = 3,
 
     /// <summary>
     /// Кардиозона
     /// </summary>
-    Cardio,
+    Cardio = 4,
 
     /// <summary>
     /// Танцевальная студия
     /// </summary>
-    Dance
+    Dance = 5
 }

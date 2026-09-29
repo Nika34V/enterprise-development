@@ -11,12 +11,12 @@ public class Client : Person
     public required string Phone { get; set; }
 
     /// <summary>
-    /// Дата начала абонемента (включительно)
+    /// Дата начала абонемента 
     /// </summary>
     public required DateOnly MembershipStart { get; set; }
 
     /// <summary>
-    /// Дата окончания абонемента (включительно)
+    /// Дата окончания абонемента 
     /// </summary>
     public required DateOnly MembershipEnd { get; set; }
 }
