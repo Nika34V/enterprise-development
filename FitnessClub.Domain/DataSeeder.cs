@@ -25,21 +25,8 @@ public static class DataSeeder
     /// <summary>
     /// Тренеры
     /// </summary>
-    public static List<Trainer> GetTrainers(List<Specialization> specializations)
-    {
-        var yoga = specializations.Single(s => s.Id == 1);
-        var crossfit = specializations.Single(s => s.Id == 2);
-        var boxing = specializations.Single(s => s.Id == 3);
-        var pilates = specializations.Single(s => s.Id == 4);
-        var swimming = specializations.Single(s => s.Id == 5);
-        var strength = specializations.Single(s => s.Id == 6);
-        var stretching = specializations.Single(s => s.Id == 7);
-        var dance = specializations.Single(s => s.Id == 8);
-        var functional = specializations.Single(s => s.Id == 9);
-        var cardio = specializations.Single(s => s.Id == 10);
-
-        return
-        [
+    public static List<Trainer> GetTrainers(List<Specialization> specializations) =>
+    [
             new Trainer
             {
                 Id = 1,
@@ -47,7 +34,7 @@ public static class DataSeeder
                 FullName = "Лебедев Артур Ильдарович",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(1990, 2, 11),
-                Specialization = boxing,
+                Specialization = specializations.Single(s => s.Id == 3),
                 ExperienceYears = 8
             },
             new Trainer
@@ -57,7 +44,7 @@ public static class DataSeeder
                 FullName = "Ковалёва Ирина Борисовна",
                 Gender = Gender.Female,
                 BirthDate = new DateOnly(1985, 6, 30),
-                Specialization = yoga,
+                Specialization = specializations.Single(s => s.Id == 1),
                 ExperienceYears = 12
             },
             new Trainer
@@ -67,7 +54,7 @@ public static class DataSeeder
                 FullName = "Захаров Глеб Матвеевич",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(1997, 10, 4),
-                Specialization = crossfit,
+                Specialization = specializations.Single(s => s.Id == 2),
                 ExperienceYears = 2
             },
             new Trainer
@@ -77,7 +64,7 @@ public static class DataSeeder
                 FullName = "Мельникова Вера Аркадьевна",
                 Gender = Gender.Female,
                 BirthDate = new DateOnly(1993, 1, 19),
-                Specialization = pilates,
+                Specialization = specializations.Single(s => s.Id == 4),
                 ExperienceYears = 5
             },
             new Trainer
@@ -87,7 +74,7 @@ public static class DataSeeder
                 FullName = "Ткачук Денис Русланович",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(1988, 8, 8),
-                Specialization = swimming,
+                Specialization = specializations.Single(s => s.Id == 5),
                 ExperienceYears = 4
             },
             new Trainer
@@ -97,7 +84,7 @@ public static class DataSeeder
                 FullName = "Аксёнова Людмила Петровна",
                 Gender = Gender.Female,
                 BirthDate = new DateOnly(1979, 12, 25),
-                Specialization = stretching,
+                Specialization = specializations.Single(s => s.Id == 7),
                 ExperienceYears = 15
             },
             new Trainer
@@ -107,7 +94,7 @@ public static class DataSeeder
                 FullName = "Бондарев Кирилл Захарович",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(2000, 3, 27),
-                Specialization = strength,
+                Specialization = specializations.Single(s => s.Id == 6),
                 ExperienceYears = 1
             },
             new Trainer
@@ -117,7 +104,7 @@ public static class DataSeeder
                 FullName = "Шевцова Диана Артёмовна",
                 Gender = Gender.Female,
                 BirthDate = new DateOnly(1996, 7, 14),
-                Specialization = dance,
+                Specialization = specializations.Single(s => s.Id == 8),
                 ExperienceYears = 6
             },
             new Trainer
@@ -127,7 +114,7 @@ public static class DataSeeder
                 FullName = "Рябов Станислав Львович",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(1992, 5, 2),
-                Specialization = functional,
+                Specialization = specializations.Single(s => s.Id == 9),
                 ExperienceYears = 3
             },
             new Trainer
@@ -137,7 +124,7 @@ public static class DataSeeder
                 FullName = "Гришин Олег Тимурович",
                 Gender = Gender.Male,
                 BirthDate = new DateOnly(1981, 11, 16),
-                Specialization = cardio,
+                Specialization = specializations.Single(s => s.Id == 10),
                 ExperienceYears = 10
             }
         ];

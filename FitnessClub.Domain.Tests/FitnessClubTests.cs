@@ -3,71 +3,69 @@ namespace FitnessClub.Domain.Tests;
 /// <summary>
 /// LINQ-запросы предметной области фитнес-клуба
 /// </summary>
-public class FitnessClubTests
+public class FitnessClubTests(FitnessClubFixture fixture) : IClassFixture<FitnessClubFixture>
 {
-    private static readonly DateTime Now = new(2026, 5, 20, 11, 30, 0);
-    private static readonly DateOnly Today = DateOnly.FromDateTime(Now);
-
-    private readonly List<Specialization> _specializations;
-    private readonly List<Trainer> _trainers;
-    private readonly List<Client> _clients;
-    private readonly List<Enrollment> _enrollments;
-
-    public FitnessClubTests()
-    {
-        _specializations = DataSeeder.GetSpecializations();
-        _trainers = DataSeeder.GetTrainers(_specializations);
-        _clients = DataSeeder.GetClients();
-        _enrollments = DataSeeder.GetEnrollments(_clients, _trainers, Now);
-    }
-
     /// <summary>
-    /// Тренеры со стажем не менее 5 лет
+    /// Запрос 1: тренеры со стажем не менее 5 лет.
+    /// Граница включена: тренер ровно с пятью годами должен попасть в выборку
     /// </summary>
     [Fact]
     public void Trainers_WithFiveOrMoreYears_AreSelected()
     {
-        var actual = _trainers
+        string[] expected =
+        [
+            "Аксёнова Людмила Петровна",
+            "Гришин Олег Тимурович",
+            "Ковалёва Ирина Борисовна",
+            "Лебедев Артур Ильдарович",
+            "Мельникова Вера Аркадьевна", // ровно 5 лет
+            "Шевцова Диана Артёмовна"
+        ];
+
+        var actual = fixture.Trainers
             .Where(t => t.ExperienceYears >= 5)
             .Select(t => t.FullName)
             .Order()
             .ToList();
 
-        Assert.All(actual, name => Assert.Contains(_trainers, t => t.FullName == name && t.ExperienceYears >= 5));
-        Assert.Equal(_trainers.Count(t => t.ExperienceYears >= 5), actual.Count);
+        Assert.Equal(expected, actual);
     }
 
     /// <summary>
-    /// Доступность зала для записи в данный момент
+    /// Запрос 2: доступность зала для записи в данный момент.
+    /// Зал занят, если в нём идёт занятие
     /// </summary>
     [Theory]
-    [InlineData(Hall.Swimming, false)]
-    [InlineData(Hall.Strength, false)]
-    [InlineData(Hall.Dance, true)]
-    [InlineData(Hall.Cardio, true)]
-    [InlineData(Hall.Yoga, true)]
-    [InlineData(Hall.Boxing, true)]
+    [InlineData(Hall.Swimming, false)] // занятие 11:00–12:00
+    [InlineData(Hall.Strength, false)] // занятие началось ровно в 11:30
+    [InlineData(Hall.Dance, true)]     // занятие закончилось ровно в 11:30
+    [InlineData(Hall.Cardio, true)]    // занятие только в 15:00
+    [InlineData(Hall.Yoga, true)]      // занятие было вчера
+    [InlineData(Hall.Boxing, true)]    // занятий сегодня нет
     public void Hall_AtCurrentMoment_IsAvailableOnlyWithoutOngoingSession(Hall hall, bool expected)
     {
-        var isAvailable = !_enrollments.Any(e => e.Hall == hall && e.IsOngoingAt(Now));
+        var isAvailable = !fixture.Enrollments.Any(e => e.Hall == hall && e.IsOngoingAt(fixture.Now));
 
         Assert.Equal(expected, isAvailable);
     }
 
     /// <summary>
-    /// Клиенты с просроченным абонементом, по ФИО
+    /// Запрос 3: клиенты с просроченным абонементом, по ФИО.
+    /// Абонемент, заканчивающийся сегодня, ещё действует
     /// </summary>
     [Fact]
     public void Clients_WithExpiredMembership_AreOrderedByFullName()
     {
-        var expected = _clients
-            .Where(c => c.MembershipEnd < Today)
-            .Select(c => c.FullName)
-            .Order()
-            .ToList();
+        string[] expected =
+        [
+            "Баранова Вероника Алексеевна",
+            "Носков Тимофей Аркадьевич",
+            "Чернова Ангелина Денисовна",
+            "Юдина Олеся Романовна"
+        ];
 
-        var actual = _clients
-            .Where(c => c.MembershipEnd < Today)
+        var actual = fixture.Clients
+            .Where(c => c.MembershipEnd < fixture.Today)
             .OrderBy(c => c.FullName)
             .Select(c => c.FullName)
             .ToList();
@@ -76,39 +74,51 @@ public class FitnessClubTests
     }
 
     /// <summary>
-    /// Занятия выбранного зала за текущий месяц
+    /// Запрос 4: занятия выбранного зала за текущий месяц.
+    /// Занятия на границах месяца (30 апреля, 1 июня) в выборку не входят
     /// </summary>
     [Fact]
     public void Sessions_InSelectedHall_ThisMonthOnly()
     {
         const Hall selected = Hall.Boxing;
+        int[] expectedIds = [1, 2, 3];
 
-        var actual = _enrollments
+        var actualIds = fixture.Enrollments
             .Where(e => e.Hall == selected
-                        && e.StartsAt.Year == Now.Year
-                        && e.StartsAt.Month == Now.Month)
+                        && e.StartsAt.Year == fixture.Now.Year
+                        && e.StartsAt.Month == fixture.Now.Month)
+            .Select(e => e.Id)
+            .Order()
             .ToList();
 
-        Assert.All(actual, e => Assert.Equal(selected, e.Hall));
-        Assert.All(actual, e => Assert.Equal(Now.Month, e.StartsAt.Month));
+        Assert.Equal(expectedIds, actualIds);
     }
 
     /// <summary>
-    /// Пять самых популярных тренеров
+    /// Запрос 5: пять самых популярных тренеров.
+    /// Число занятий: Лебедев 6, Ковалёва 5, Шевцова 4, Мельникова 3, Гришин 2
     /// </summary>
     [Fact]
     public void Trainers_TopFiveByEnrollmentCount_AreInDescendingOrder()
     {
-        var top = _enrollments
+        string[] expected =
+        [
+            "Лебедев Артур Ильдарович",
+            "Ковалёва Ирина Борисовна",
+            "Шевцова Диана Артёмовна",
+            "Мельникова Вера Аркадьевна",
+            "Гришин Олег Тимурович"
+        ];
+
+        var actual = fixture.Enrollments
             .GroupBy(e => e.Trainer.Id)
             .Select(g => new { TrainerId = g.Key, Count = g.Count() })
             .OrderByDescending(x => x.Count)
             .ThenBy(x => x.TrainerId)
             .Take(5)
+            .Select(x => fixture.Trainers.Single(t => t.Id == x.TrainerId).FullName)
             .ToList();
 
-        Assert.Equal(5, top.Count);
-        for (var i = 1; i < top.Count; i++)
-            Assert.True(top[i - 1].Count >= top[i].Count);
+        Assert.Equal(expected, actual);
     }
 }

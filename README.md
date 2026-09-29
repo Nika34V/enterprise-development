@@ -34,20 +34,16 @@
 FitnessClub.sln
 ├── FitnessClub.Domain/          — доменная модель
 │   ├── Client.cs
-│   ├── Trainer.cs
+│   ├── DataSeeder.cs
+│   ├── Enrollment.cs
+│   ├── Gender.cs
+│   ├── Hall.cs
 │   ├── Person.cs
 │   ├── Specialization.cs
-│   ├── Hall.cs
-│   ├── Enrollment.cs
-│   └── DataSeeder.cs
+│   └── Trainer.cs
 └── FitnessClub.Domain.Tests/    — unit-тесты (xUnit v3)
-    ├── TestData.cs
-    ├── SeedSizeTests.cs
-    ├── ExperiencedTrainersTests.cs
-    ├── HallAvailabilityTests.cs
-    ├── ExpiredMembershipTests.cs
-    ├── MonthlyHallSessionsTests.cs
-    └── TopTrainersTests.cs
+    ├── FitnessClubFixture.cs
+    └── FitnessClubTests.cs
 ```
 
 ## Запуск тестов
