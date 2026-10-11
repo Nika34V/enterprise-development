@@ -128,7 +128,6 @@ public static class DataSeeder
                 ExperienceYears = 10
             }
         ];
-    }
 
     /// <summary>
     /// Клиенты
