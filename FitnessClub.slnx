@@ -1,4 +1,13 @@
 <Solution>
-  <Project Path="FitnessClub.Domain.Tests/FitnessClub.Domain.Tests.csproj" />
-  <Project Path="FitnessClub.Domain/FitnessClub.Domain.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/FitnessClub.Api/FitnessClub.Api.csproj" />
+    <Project Path="src/FitnessClub.AppHost/FitnessClub.AppHost.csproj" />
+    <Project Path="src/FitnessClub.Application/FitnessClub.Application.csproj" />
+    <Project Path="src/FitnessClub.Contracts/FitnessClub.Contracts.csproj" />
+    <Project Path="src/FitnessClub.Domain/FitnessClub.Domain.csproj" />
+    <Project Path="src/FitnessClub.Infrastructure.InMemory/FitnessClub.Infrastructure.InMemory.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FitnessClub.Domain.Tests/FitnessClub.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
