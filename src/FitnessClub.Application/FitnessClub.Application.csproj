@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FitnessClub.Contracts\FitnessClub.Contracts.csproj" />
     <ProjectReference Include="..\FitnessClub.Domain\FitnessClub.Domain.csproj" />
+	<ProjectReference Include="..\FitnessClub.Shared\FitnessClub.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
