@@ -1,3 +1,5 @@
+using FitnessClub.Shared.Enums;
+
 namespace FitnessClub.Domain.Tests;
 
 /// <summary>

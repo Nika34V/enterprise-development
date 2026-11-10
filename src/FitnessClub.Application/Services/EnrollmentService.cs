@@ -1,62 +1,120 @@
 ﻿using FitnessClub.Application.Mapping;
 using FitnessClub.Contracts.Dto;
+using FitnessClub.Contracts.Exceptions;
 using FitnessClub.Contracts.Interfaces;
 using FitnessClub.Domain;
 using FitnessClub.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace FitnessClub.Application.Services;
 
 /// <summary>
-/// Сервис управления записями на занятия
+/// Сервис управления записями на занятия: проверка данных, логирование и вызов репозиториев
 /// </summary>
 public class EnrollmentService(
     IEnrollmentRepository enrollmentRepository,
     IClientRepository clientRepository,
-    ITrainerRepository trainerRepository) : IEnrollmentService
+    ITrainerRepository trainerRepository,
+    ILogger<EnrollmentService> logger) : IEnrollmentService
 {
+    /// <summary>
+    /// Возвращает все записи на занятия
+    /// </summary>
     public async Task<IReadOnlyList<EnrollmentDto>> GetAllAsync()
     {
         var entities = await enrollmentRepository.GetAllAsync();
-        return entities.Select(EnrollmentMapper.ToDto).ToList();
+        return [.. entities.Select(EnrollmentMapper.ToDto)];
     }
 
-    public async Task<EnrollmentDto?> GetByIdAsync(int id)
+    /// <summary>
+    /// Возвращает запись на занятие по идентификатору
+    /// </summary>
+    /// <exception cref="NotFoundException">Запись не найдена</exception>
+    public async Task<EnrollmentDto> GetByIdAsync(int id)
     {
-        var entity = await enrollmentRepository.GetByIdAsync(id);
-        return entity == null ? null : EnrollmentMapper.ToDto(entity);
+        var entity = await GetEntityAsync(id);
+        return EnrollmentMapper.ToDto(entity);
     }
 
+    /// <summary>
+    /// Создаёт запись на занятие после проверки данных
+    /// </summary>
+    /// <exception cref="InvalidRequestException">Данные записи некорректны или клиент/тренер не найден</exception>
     public async Task<EnrollmentDto> CreateAsync(EnrollmentEditDto dto)
     {
+        Validate(dto);
         var (client, trainer) = await ResolveReferencesAsync(dto.ClientId, dto.TrainerId);
 
-        var entity = EnrollmentMapper.ToEntity(dto, client, trainer);
-        var added = await enrollmentRepository.AddAsync(entity);
+        var added = await enrollmentRepository.AddAsync(EnrollmentMapper.ToEntity(dto, client, trainer));
+        logger.LogInformation("Создана запись на занятие с Id {Id}", added.Id);
+
         return EnrollmentMapper.ToDto(added);
     }
 
-    public async Task<bool> UpdateAsync(int id, EnrollmentEditDto dto)
+    /// <summary>
+    /// Изменяет запись на занятие после проверки данных
+    /// </summary>
+    /// <exception cref="NotFoundException">Запись не найдена</exception>
+    /// <exception cref="InvalidRequestException">Данные записи некорректны или клиент/тренер не найден</exception>
+    public async Task UpdateAsync(int id, EnrollmentEditDto dto)
     {
-        var existing = await enrollmentRepository.GetByIdAsync(id);
-        if (existing == null)
-            return false;
-
+        var existing = await GetEntityAsync(id);
+        Validate(dto);
         var (client, trainer) = await ResolveReferencesAsync(dto.ClientId, dto.TrainerId);
 
         EnrollmentMapper.ApplyTo(existing, dto, client, trainer);
-        return await enrollmentRepository.UpdateAsync(existing);
+        await enrollmentRepository.UpdateAsync(existing);
+        logger.LogInformation("Обновлена запись на занятие с Id {Id}", id);
     }
 
-    public Task<bool> DeleteAsync(int id) => enrollmentRepository.DeleteAsync(id);
+    /// <summary>
+    /// Удаляет запись на занятие. Если записи уже нет, ошибки не возникает (операция идемпотентна)
+    /// </summary>
+    public async Task DeleteAsync(int id)
+    {
+        var deleted = await enrollmentRepository.DeleteAsync(id);
+
+        if (deleted)
+            logger.LogInformation("Удалена запись на занятие с Id {Id}", id);
+        else
+            logger.LogInformation("Запись на занятие с Id {Id} уже отсутствует, удалять нечего", id);
+    }
+
+    private async Task<Enrollment> GetEntityAsync(int id)
+    {
+        var entity = await enrollmentRepository.GetByIdAsync(id);
+        if (entity is null)
+        {
+            logger.LogWarning("Запись на занятие с Id {Id} не найдена", id);
+            throw new NotFoundException($"Запись на занятие с Id {id} не найдена");
+        }
+
+        return entity;
+    }
+
+    private void Validate(EnrollmentEditDto dto)
+    {
+        if (!Enum.IsDefined(dto.Hall))
+            throw Invalid("Указан несуществующий зал");
+
+        if (dto.EndsAt <= dto.StartsAt)
+            throw Invalid("Время окончания занятия должно быть позже времени начала");
+    }
 
     private async Task<(Client Client, Trainer Trainer)> ResolveReferencesAsync(int clientId, int trainerId)
     {
         var client = await clientRepository.GetByIdAsync(clientId)
-            ?? throw new ArgumentException($"Клиент с Id {clientId} не найден");
+            ?? throw Invalid($"Клиент с Id {clientId} не найден");
 
         var trainer = await trainerRepository.GetByIdAsync(trainerId)
-            ?? throw new ArgumentException($"Тренер с Id {trainerId} не найден");
+            ?? throw Invalid($"Тренер с Id {trainerId} не найден");
 
         return (client, trainer);
+    }
+
+    private InvalidRequestException Invalid(string message)
+    {
+        logger.LogWarning("Некорректные данные записи на занятие: {Message}", message);
+        return new InvalidRequestException(message);
     }
 }

@@ -39,4 +39,10 @@ public static class TrainerMapper
         entity.Specialization = specialization;
         entity.ExperienceYears = dto.ExperienceYears;
     }
+
+    public static TopTrainerDto ToTopDto(Trainer entity, int enrollmentsCount) => new()
+    {
+        Trainer = ToDto(entity),
+        EnrollmentsCount = enrollmentsCount
+    };
 }

@@ -1,4 +1,6 @@
-﻿namespace FitnessClub.Domain;
+﻿using FitnessClub.Shared.Enums;
+
+namespace FitnessClub.Domain;
 
 /// <summary>
 /// Начальные данные фитнес-клуба

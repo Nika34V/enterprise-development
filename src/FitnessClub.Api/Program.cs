@@ -1,6 +1,8 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using FitnessClub.Api.ExceptionHandling;
 using FitnessClub.Application.DependencyInjection;
 using FitnessClub.Infrastructure.InMemory.DependencyInjection;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,21 +15,24 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(c =>
+builder.Services.ConfigureHttpJsonOptions(options =>
 {
-    var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
-    foreach (var xmlFile in xmlFiles)
-        c.IncludeXmlComments(xmlFile);
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

@@ -1,4 +1,6 @@
-﻿namespace FitnessClub.Domain;
+﻿using FitnessClub.Shared.Enums;
+
+namespace FitnessClub.Domain;
 
 /// <summary>
 /// Запись клиента на персональное занятие к тренеру 

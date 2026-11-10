@@ -6,6 +6,7 @@
     <Project Path="src/FitnessClub.Contracts/FitnessClub.Contracts.csproj" />
     <Project Path="src/FitnessClub.Domain/FitnessClub.Domain.csproj" />
     <Project Path="src/FitnessClub.Infrastructure.InMemory/FitnessClub.Infrastructure.InMemory.csproj" />
+    <Project Path="src/FitnessClub.Shared/FitnessClub.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FitnessClub.Domain.Tests/FitnessClub.Domain.Tests.csproj" />

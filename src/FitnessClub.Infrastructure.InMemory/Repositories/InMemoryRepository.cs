@@ -13,7 +13,7 @@ public abstract class InMemoryRepository<TEntity>(
     protected List<TEntity> Items { get; } = items;
 
     public Task<IReadOnlyList<TEntity>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<TEntity>>(Items.ToList());
+        Task.FromResult<IReadOnlyList<TEntity>>([.. Items]);
 
     public Task<TEntity?> GetByIdAsync(int id) =>
         Task.FromResult(Items.FirstOrDefault(e => getId(e) == id));

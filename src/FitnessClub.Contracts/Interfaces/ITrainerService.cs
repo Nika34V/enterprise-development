@@ -3,7 +3,6 @@
 namespace FitnessClub.Contracts.Interfaces;
 
 /// <summary>
-/// Сервис управления тренерами.
-/// CreateAsync/UpdateAsync могут выбросить <see cref="ArgumentException"/>, если специализация не найдена
+/// Сервис управления тренерами
 /// </summary>
 public interface ITrainerService : IEntityService<TrainerDto, TrainerEditDto>;

@@ -28,11 +28,12 @@
 - Платформа: .NET 10.0
 - Веб-фреймворк: ASP.NET Core Web API
 - Маппинг: ручной маппинг (Domain ↔ DTO) в сервисном слое
-- Документация API: Swagger UI / OpenAPI с интеграцией XML-комментариев
+- Обработка ошибок: исключения сервисов + глобальный `IExceptionHandler` (ответы в формате ProblemDetails)
+- Документация API: OpenAPI (Microsoft.AspNetCore.OpenApi) + Scalar UI с интеграцией XML-комментариев
 - Фреймворк тестирования: xUnit v3
 - Continuous Integration: GitHub Actions (автоматический запуск тестов при push / pull_request)
 - Оркестрация: .NET Aspire (AppHost)
-- Архитектура: слоистая (Domain → Contracts → Application → Infrastructure.InMemory → Api), Repository pattern
+- Архитектура: слоистая (Shared → Domain → Contracts → Application → Infrastructure.InMemory → Api), Repository pattern
 
 ## Структура решения
 
@@ -43,9 +44,11 @@ FitnessClub.slnx
 │       └── Test.yml                          — CI: восстановление, сборка, запуск тестов
 │
 ├── src/
+│   ├── FitnessClub.Shared/                   — общие типы (enum Gender, Hall)
+│   │   └── Enums/
+│   │
 │   ├── FitnessClub.Domain/                   — доменная модель
 │   │   ├── Entities/                         — Person, Client, Trainer, Specialization, Enrollment
-│   │   ├── Enums/                            — Gender, Hall
 │   │   ├── Seeds/                            — датасид (10+ экземпляров каждого класса)
 │   │   └── Interfaces/                       — IRepository<T> и интерфейсы репозиториев сущностей
 │   │
@@ -67,7 +70,7 @@ FitnessClub.slnx
 │   │   ├── Controllers/                      — ClientsController, TrainersController,
 │   │   │                                       SpecializationsController, EnrollmentsController,
 │   │   │                                       AnalyticsController
-│   │   └── Program.cs                        — конфигурация DI, Swagger, middleware
+│   │   └── Program.cs                        — конфигурация DI, OpenAPI, Scalar, middleware
 │   │
 │   └── FitnessClub.AppHost/                  — оркестратор .NET Aspire, точка запуска системы
 │

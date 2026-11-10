@@ -1,76 +1,118 @@
 ﻿using FitnessClub.Application.Mapping;
 using FitnessClub.Contracts.Dto;
+using FitnessClub.Contracts.Exceptions;
 using FitnessClub.Contracts.Interfaces;
-using FitnessClub.Domain;
 using FitnessClub.Domain.Interfaces;
+using FitnessClub.Shared.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace FitnessClub.Application.Services;
 
 /// <summary>
-/// Сервис аналитических запросов
+/// Сервис аналитических запросов: проверка параметров, логирование и выборки данных
 /// </summary>
 public class AnalyticsService(
     IClientRepository clientRepository,
     ITrainerRepository trainerRepository,
-    IEnrollmentRepository enrollmentRepository) : IAnalyticsService
+    IEnrollmentRepository enrollmentRepository,
+    ILogger<AnalyticsService> logger) : IAnalyticsService
 {
+    /// <summary>
+    /// Возвращает тренеров со стажем не менее указанного, упорядоченных по ФИО
+    /// </summary>
+    /// <exception cref="InvalidRequestException">Стаж меньше нуля</exception>
     public async Task<IReadOnlyList<TrainerDto>> GetExperiencedTrainersAsync(int minimumYears)
     {
+        if (minimumYears < 0)
+            throw Invalid("Минимальный стаж не может быть отрицательным");
+
+        logger.LogInformation("Запрос тренеров со стажем не менее {Years} лет", minimumYears);
         var trainers = await trainerRepository.GetAllAsync();
 
-        return trainers
+        return [.. trainers
             .Where(t => t.ExperienceYears >= minimumYears)
             .OrderBy(t => t.FullName)
-            .Select(TrainerMapper.ToDto)
-            .ToList();
+            .Select(TrainerMapper.ToDto)];
     }
 
+    /// <summary>
+    /// Проверяет, нет ли в зале занятия в указанный момент времени
+    /// </summary>
+    /// <exception cref="InvalidRequestException">Указан несуществующий зал</exception>
     public async Task<HallAvailabilityDto> IsHallAvailableAsync(Hall hall, DateTime moment)
     {
+        ValidateHall(hall);
+
+        logger.LogInformation("Проверка доступности зала {Hall} на {Moment}", hall, moment);
         var enrollments = await enrollmentRepository.GetAllAsync();
         var isAvailable = !enrollments.Any(e => e.Hall == hall && e.IsOngoingAt(moment));
 
         return new HallAvailabilityDto { Hall = hall, IsAvailable = isAvailable };
     }
 
+    /// <summary>
+    /// Возвращает клиентов с просроченным абонементом, упорядоченных по ФИО
+    /// </summary>
     public async Task<IReadOnlyList<ClientDto>> GetClientsWithExpiredMembershipAsync(DateOnly asOfDate)
     {
+        logger.LogInformation("Запрос клиентов с просроченным абонементом на {Date}", asOfDate);
         var clients = await clientRepository.GetAllAsync();
 
-        return clients
+        return [.. clients
             .Where(c => c.MembershipEnd < asOfDate)
             .OrderBy(c => c.FullName)
-            .Select(ClientMapper.ToDto)
-            .ToList();
+            .Select(ClientMapper.ToDto)];
     }
 
+    /// <summary>
+    /// Возвращает занятия выбранного зала за указанный месяц
+    /// </summary>
+    /// <exception cref="InvalidRequestException">Зал, год или месяц указаны некорректно</exception>
     public async Task<IReadOnlyList<EnrollmentDto>> GetSessionsInHallForMonthAsync(Hall hall, int year, int month)
     {
+        ValidateHall(hall);
+
+        if (month is < 1 or > 12)
+            throw Invalid("Месяц должен быть числом от 1 до 12");
+
+        if (year is < 1 or > 9999)
+            throw Invalid("Год должен быть числом от 1 до 9999");
+
+        logger.LogInformation("Запрос занятий зала {Hall} за {Month}.{Year}", hall, month, year);
         var enrollments = await enrollmentRepository.GetAllAsync();
 
-        return enrollments
+        return [.. enrollments
             .Where(e => e.Hall == hall && e.StartsAt.Year == year && e.StartsAt.Month == month)
             .OrderBy(e => e.StartsAt)
-            .Select(EnrollmentMapper.ToDto)
-            .ToList();
+            .Select(EnrollmentMapper.ToDto)];
     }
 
-    public async Task<IReadOnlyList<TrainerDto>> GetTopFiveTrainersAsync()
+    /// <summary>
+    /// Возвращает пять самых популярных тренеров вместе с количеством их записей
+    /// </summary>
+    public async Task<IReadOnlyList<TopTrainerDto>> GetTopFiveTrainersAsync()
     {
+        logger.LogInformation("Запрос топ-5 тренеров по числу записей");
         var enrollments = await enrollmentRepository.GetAllAsync();
-        var trainers = await trainerRepository.GetAllAsync();
 
-        var topIds = enrollments
+        return [.. enrollments
             .GroupBy(e => e.Trainer.Id)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.Key)
+            .Select(g => new { Trainer = g.First().Trainer, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .ThenBy(x => x.Trainer.Id)
             .Take(5)
-            .Select(g => g.Key)
-            .ToList();
+            .Select(x => TrainerMapper.ToTopDto(x.Trainer, x.Count))];
+    }
 
-        return topIds
-            .Select(id => trainers.Single(t => t.Id == id))
-            .Select(TrainerMapper.ToDto)
-            .ToList();
+    private void ValidateHall(Hall hall)
+    {
+        if (!Enum.IsDefined(hall))
+            throw Invalid("Указан несуществующий зал");
+    }
+
+    private InvalidRequestException Invalid(string message)
+    {
+        logger.LogWarning("Некорректные параметры аналитического запроса: {Message}", message);
+        return new InvalidRequestException(message);
     }
 }

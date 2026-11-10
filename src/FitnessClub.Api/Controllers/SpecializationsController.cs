@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FitnessClub.Api.Controllers;
 
 /// <summary>
-/// Контроллер для управления справочником специализаций
+/// Контроллер для управления специализациями
 /// </summary>
 [ApiController]
 [Route("api/specializations")]
@@ -14,72 +14,66 @@ public class SpecializationsController(ISpecializationService service, ILogger<S
     /// <summary>
     /// Возвращает список всех специализаций
     /// </summary>
+    /// <response code="200">Список успешно получен</response>
+    /// <response code="500">Внутренняя ошибка сервера</response>
     [HttpGet]
     [ProducesResponseType(200)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<IEnumerable<SpecializationDto>>> GetAll()
     {
-        try
-        {
-            return Ok(await service.GetAllAsync());
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка при получении списка специализаций");
-            return StatusCode(500);
-        }
+        logger.LogInformation("Запрос списка специализаций");
+        var items = await service.GetAllAsync();
+        return Ok(items);
     }
 
     /// <summary>
     /// Возвращает специализацию по идентификатору
     /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <response code="200">Данные успешно получены</response>
+    /// <response code="404">Объект с таким идентификатором не найден</response>
+    /// <response code="500">Внутренняя ошибка сервера</response>
     [HttpGet("{id:int}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<SpecializationDto>> GetById(int id)
     {
-        try
-        {
-            var item = await service.GetByIdAsync(id);
-            if (item == null)
-                return NotFound();
-            return Ok(item);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка при получении специализации с Id {Id}", id);
-            return StatusCode(500);
-        }
+        logger.LogInformation("Запрос специализации с Id {Id}", id);
+        var item = await service.GetByIdAsync(id);
+        return Ok(item);
     }
 
     /// <summary>
     /// Создаёт новую специализацию
     /// </summary>
+    /// <remarks>
+    /// Идентификатор присваивается автоматически
+    /// </remarks>
+    /// <param name="dto">Данные специализации</param>
+    /// <response code="201">Успешно создано, в ответе возвращаются данные созданного объекта</response>
+    /// <response code="400">Данные некорректны</response>
+    /// <response code="500">Внутренняя ошибка сервера</response>
     [HttpPost]
     [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<SpecializationDto>> Create([FromBody] SpecializationEditDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        try
-        {
-            var created = await service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка при создании специализации");
-            return StatusCode(500);
-        }
+        logger.LogInformation("Запрос на создание специализации");
+        var created = await service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>
-    /// Обновляет существующую специализацию
+    /// Изменяет данные специализации
     /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <param name="dto">Новые данные специализации</param>
+    /// <response code="204">Данные изменены</response>
+    /// <response code="400">Данные некорректны</response>
+    /// <response code="404">Объект с таким идентификатором не найден</response>
+    /// <response code="500">Внутренняя ошибка сервера</response>
     [HttpPut("{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -87,40 +81,27 @@ public class SpecializationsController(ISpecializationService service, ILogger<S
     [ProducesResponseType(500)]
     public async Task<ActionResult> Update(int id, [FromBody] SpecializationEditDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        try
-        {
-            var updated = await service.UpdateAsync(id, dto);
-            return updated ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка при обновлении специализации с Id {Id}", id);
-            return StatusCode(500);
-        }
+        logger.LogInformation("Запрос на изменение специализации с Id {Id}", id);
+        await service.UpdateAsync(id, dto);
+        return NoContent();
     }
 
     /// <summary>
     /// Удаляет специализацию по идентификатору
     /// </summary>
+    /// <remarks>
+    /// Операция идемпотентна: если специализации с таким идентификатором нет, метод всё равно возвращает 204
+    /// </remarks>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <response code="204">Успешно: объект удалён или его уже не было</response>
+    /// <response code="500">Внутренняя ошибка сервера</response>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
     [ProducesResponseType(500)]
     public async Task<ActionResult> Delete(int id)
     {
-        try
-        {
-            var deleted = await service.DeleteAsync(id);
-            return deleted ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка при удалении специализации с Id {Id}", id);
-            return StatusCode(500);
-        }
+        logger.LogInformation("Запрос на удаление специализации с Id {Id}", id);
+        await service.DeleteAsync(id);
+        return NoContent();
     }
 }
