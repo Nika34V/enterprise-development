@@ -20,6 +20,7 @@ public class EnrollmentService(
     /// <summary>
     /// Возвращает все записи на занятия
     /// </summary>
+    /// <returns>Список записей на занятия в виде DTO</returns>
     public async Task<IReadOnlyList<EnrollmentDto>> GetAllAsync()
     {
         var entities = await enrollmentRepository.GetAllAsync();
@@ -29,6 +30,8 @@ public class EnrollmentService(
     /// <summary>
     /// Возвращает запись на занятие по идентификатору
     /// </summary>
+    /// <param name="id">Идентификатор записи на занятие</param>
+    /// <returns>DTO записи на занятие</returns>
     /// <exception cref="NotFoundException">Запись не найдена</exception>
     public async Task<EnrollmentDto> GetByIdAsync(int id)
     {
@@ -39,6 +42,8 @@ public class EnrollmentService(
     /// <summary>
     /// Создаёт запись на занятие после проверки данных
     /// </summary>
+    /// <param name="dto">Данные записи на занятие</param>
+    /// <returns>DTO записи на занятие с присвоенным идентификатором</returns>
     /// <exception cref="InvalidRequestException">Данные записи некорректны или клиент/тренер не найден</exception>
     public async Task<EnrollmentDto> CreateAsync(EnrollmentEditDto dto)
     {
@@ -54,6 +59,9 @@ public class EnrollmentService(
     /// <summary>
     /// Изменяет запись на занятие после проверки данных
     /// </summary>
+    /// <param name="id">Идентификатор записи на занятие</param>
+    /// <param name="dto">Новые данные записи на занятие</param>
+    /// <returns>Задача, завершающаяся после сохранения изменений</returns>
     /// <exception cref="NotFoundException">Запись не найдена</exception>
     /// <exception cref="InvalidRequestException">Данные записи некорректны или клиент/тренер не найден</exception>
     public async Task UpdateAsync(int id, EnrollmentEditDto dto)
@@ -70,6 +78,8 @@ public class EnrollmentService(
     /// <summary>
     /// Удаляет запись на занятие. Если записи уже нет, ошибки не возникает (операция идемпотентна)
     /// </summary>
+    /// <param name="id">Идентификатор записи на занятие</param>
+    /// <returns>Задача, завершающаяся после удаления; если объекта уже нет, ошибки не возникает</returns>
     public async Task DeleteAsync(int id)
     {
         var deleted = await enrollmentRepository.DeleteAsync(id);

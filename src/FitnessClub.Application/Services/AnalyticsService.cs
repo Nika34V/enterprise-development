@@ -20,6 +20,8 @@ public class AnalyticsService(
     /// <summary>
     /// Возвращает тренеров со стажем не менее указанного, упорядоченных по ФИО
     /// </summary>
+    /// <param name="minimumYears">Минимальный стаж работы в годах (включительно), не меньше 0</param>
+    /// <returns>Список тренеров со стажем не менее указанного, упорядоченный по ФИО</returns>
     /// <exception cref="InvalidRequestException">Стаж меньше нуля</exception>
     public async Task<IReadOnlyList<TrainerDto>> GetExperiencedTrainersAsync(int minimumYears)
     {
@@ -38,6 +40,9 @@ public class AnalyticsService(
     /// <summary>
     /// Проверяет, нет ли в зале занятия в указанный момент времени
     /// </summary>
+    /// <param name="hall">Проверяемый зал</param>
+    /// <param name="moment">Момент времени, на который проверяется доступность</param>
+    /// <returns>Информация о доступности зала: свободен он или занят в этот момент</returns>
     /// <exception cref="InvalidRequestException">Указан несуществующий зал</exception>
     public async Task<HallAvailabilityDto> IsHallAvailableAsync(Hall hall, DateTime moment)
     {
@@ -53,6 +58,8 @@ public class AnalyticsService(
     /// <summary>
     /// Возвращает клиентов с просроченным абонементом, упорядоченных по ФИО
     /// </summary>
+    /// <param name="asOfDate">Дата, на которую проверяется просрочка абонемента</param>
+    /// <returns>Список клиентов с просроченным абонементом, упорядоченный по ФИО</returns>
     public async Task<IReadOnlyList<ClientDto>> GetClientsWithExpiredMembershipAsync(DateOnly asOfDate)
     {
         logger.LogInformation("Запрос клиентов с просроченным абонементом на {Date}", asOfDate);
@@ -67,6 +74,10 @@ public class AnalyticsService(
     /// <summary>
     /// Возвращает занятия выбранного зала за указанный месяц
     /// </summary>
+    /// <param name="hall">Зал</param>
+    /// <param name="year">Год (от 1 до 9999)</param>
+    /// <param name="month">Месяц (от 1 до 12)</param>
+    /// <returns>Список занятий зала за месяц, упорядоченный по времени начала</returns>
     /// <exception cref="InvalidRequestException">Зал, год или месяц указаны некорректно</exception>
     public async Task<IReadOnlyList<EnrollmentDto>> GetSessionsInHallForMonthAsync(Hall hall, int year, int month)
     {
@@ -90,6 +101,7 @@ public class AnalyticsService(
     /// <summary>
     /// Возвращает пять самых популярных тренеров вместе с количеством их записей
     /// </summary>
+    /// <returns>Пять самых популярных тренеров с количеством их записей, по убыванию популярности</returns>
     public async Task<IReadOnlyList<TopTrainerDto>> GetTopFiveTrainersAsync()
     {
         logger.LogInformation("Запрос топ-5 тренеров по числу записей");

@@ -16,6 +16,7 @@ public class ClientService(IClientRepository repository, ILogger<ClientService> 
     /// <summary>
     /// Возвращает всех клиентов
     /// </summary>
+    /// <returns>Список клиентов в виде DTO</returns>
     public async Task<IReadOnlyList<ClientDto>> GetAllAsync()
     {
         var entities = await repository.GetAllAsync();
@@ -25,6 +26,8 @@ public class ClientService(IClientRepository repository, ILogger<ClientService> 
     /// <summary>
     /// Возвращает клиента по идентификатору
     /// </summary>
+    /// <param name="id">Идентификатор клиента</param>
+    /// <returns>DTO клиента</returns>
     /// <exception cref="NotFoundException">Клиент не найден</exception>
     public async Task<ClientDto> GetByIdAsync(int id)
     {
@@ -35,6 +38,8 @@ public class ClientService(IClientRepository repository, ILogger<ClientService> 
     /// <summary>
     /// Создаёт клиента после проверки данных
     /// </summary>
+    /// <param name="dto">Данные клиента</param>
+    /// <returns>DTO клиента с присвоенным идентификатором</returns>
     /// <exception cref="InvalidRequestException">Данные клиента некорректны</exception>
     public async Task<ClientDto> CreateAsync(ClientEditDto dto)
     {
@@ -49,6 +54,9 @@ public class ClientService(IClientRepository repository, ILogger<ClientService> 
     /// <summary>
     /// Изменяет данные клиента после проверки
     /// </summary>
+    /// <param name="id">Идентификатор клиента</param>
+    /// <param name="dto">Новые данные клиента</param>
+    /// <returns>Задача, завершающаяся после сохранения изменений</returns>
     /// <exception cref="NotFoundException">Клиент не найден</exception>
     /// <exception cref="InvalidRequestException">Данные клиента некорректны</exception>
     public async Task UpdateAsync(int id, ClientEditDto dto)
@@ -64,6 +72,8 @@ public class ClientService(IClientRepository repository, ILogger<ClientService> 
     /// <summary>
     /// Удаляет клиента. Если клиента уже нет, ошибки не возникает (операция идемпотентна)
     /// </summary>
+    /// <param name="id">Идентификатор клиента</param>
+    /// <returns>Задача, завершающаяся после удаления; если объекта уже нет, ошибки не возникает</returns>
     public async Task DeleteAsync(int id)
     {
         var deleted = await repository.DeleteAsync(id);

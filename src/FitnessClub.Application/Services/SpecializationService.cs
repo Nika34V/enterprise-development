@@ -16,6 +16,7 @@ public class SpecializationService(ISpecializationRepository repository, ILogger
     /// <summary>
     /// Возвращает все специализации
     /// </summary>
+    /// <returns>Список специализаций в виде DTO</returns>
     public async Task<IReadOnlyList<SpecializationDto>> GetAllAsync()
     {
         var entities = await repository.GetAllAsync();
@@ -25,6 +26,8 @@ public class SpecializationService(ISpecializationRepository repository, ILogger
     /// <summary>
     /// Возвращает специализацию по идентификатору
     /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <returns>DTO специализации</returns>
     /// <exception cref="NotFoundException">Специализация не найдена</exception>
     public async Task<SpecializationDto> GetByIdAsync(int id)
     {
@@ -35,6 +38,8 @@ public class SpecializationService(ISpecializationRepository repository, ILogger
     /// <summary>
     /// Создаёт специализацию после проверки данных
     /// </summary>
+    /// <param name="dto">Данные специализации</param>
+    /// <returns>DTO специализации с присвоенным идентификатором</returns>
     /// <exception cref="InvalidRequestException">Данные специализации некорректны</exception>
     public async Task<SpecializationDto> CreateAsync(SpecializationEditDto dto)
     {
@@ -49,6 +54,9 @@ public class SpecializationService(ISpecializationRepository repository, ILogger
     /// <summary>
     /// Изменяет специализацию после проверки данных
     /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <param name="dto">Новые данные специализации</param>
+    /// <returns>Задача, завершающаяся после сохранения изменений</returns>
     /// <exception cref="NotFoundException">Специализация не найдена</exception>
     /// <exception cref="InvalidRequestException">Данные специализации некорректны</exception>
     public async Task UpdateAsync(int id, SpecializationEditDto dto)
@@ -64,6 +72,8 @@ public class SpecializationService(ISpecializationRepository repository, ILogger
     /// <summary>
     /// Удаляет специализацию. Если её уже нет, ошибки не возникает (операция идемпотентна)
     /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <returns>Задача, завершающаяся после удаления; если объекта уже нет, ошибки не возникает</returns>
     public async Task DeleteAsync(int id)
     {
         var deleted = await repository.DeleteAsync(id);

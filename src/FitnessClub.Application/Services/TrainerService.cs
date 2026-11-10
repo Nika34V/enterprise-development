@@ -19,6 +19,7 @@ public class TrainerService(
     /// <summary>
     /// Возвращает всех тренеров
     /// </summary>
+    /// <returns>Список тренеров в виде DTO</returns>
     public async Task<IReadOnlyList<TrainerDto>> GetAllAsync()
     {
         var entities = await trainerRepository.GetAllAsync();
@@ -28,6 +29,8 @@ public class TrainerService(
     /// <summary>
     /// Возвращает тренера по идентификатору
     /// </summary>
+    /// <param name="id">Идентификатор тренера</param>
+    /// <returns>DTO тренера</returns>
     /// <exception cref="NotFoundException">Тренер не найден</exception>
     public async Task<TrainerDto> GetByIdAsync(int id)
     {
@@ -38,6 +41,8 @@ public class TrainerService(
     /// <summary>
     /// Создаёт тренера после проверки данных
     /// </summary>
+    /// <param name="dto">Данные тренера</param>
+    /// <returns>DTO тренера с присвоенным идентификатором</returns>
     /// <exception cref="InvalidRequestException">Данные тренера некорректны</exception>
     public async Task<TrainerDto> CreateAsync(TrainerEditDto dto)
     {
@@ -53,6 +58,9 @@ public class TrainerService(
     /// <summary>
     /// Изменяет данные тренера после проверки
     /// </summary>
+    /// <param name="id">Идентификатор тренера</param>
+    /// <param name="dto">Новые данные тренера</param>
+    /// <returns>Задача, завершающаяся после сохранения изменений</returns>
     /// <exception cref="NotFoundException">Тренер не найден</exception>
     /// <exception cref="InvalidRequestException">Данные тренера некорректны</exception>
     public async Task UpdateAsync(int id, TrainerEditDto dto)
@@ -69,6 +77,8 @@ public class TrainerService(
     /// <summary>
     /// Удаляет тренера. Если тренера уже нет, ошибки не возникает (операция идемпотентна)
     /// </summary>
+    /// <param name="id">Идентификатор тренера</param>
+    /// <returns>Задача, завершающаяся после удаления; если объекта уже нет, ошибки не возникает</returns>
     public async Task DeleteAsync(int id)
     {
         var deleted = await trainerRepository.DeleteAsync(id);
