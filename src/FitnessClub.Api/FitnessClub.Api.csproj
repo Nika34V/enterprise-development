@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.*">
+	 <PrivateAssets>all</PrivateAssets>
+	 <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.30" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FitnessClub.Application\FitnessClub.Application.csproj" />
+    <ProjectReference Include="..\FitnessClub.Contracts\FitnessClub.Contracts.csproj" />
+    <ProjectReference Include="..\FitnessClub.Domain\FitnessClub.Domain.csproj" />
+	<ProjectReference Include="..\FitnessClub.Infrastructure.MsSqlServer\FitnessClub.Infrastructure.MsSqlServer.csproj" />
+    <ProjectReference Include="..\FitnessClub.Shared\FitnessClub.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
