@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # Разработка корпоративных приложений
 [Таблица с успеваемостью](https://docs.google.com/spreadsheets/d/1nHewCKHKgS9BqbfIv1GTuropMRdFEIDgqLwYDaufA-U/edit?pli=1&gid=0#gid=0)
 
